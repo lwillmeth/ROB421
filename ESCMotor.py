@@ -8,12 +8,13 @@ class Motor:
         self.ESC_MIN        = 1000
         self.ESC_MAX        = 2000
         self.PIN            = pin
+        self.pi             = pi
 
         # Enable ESC output pin
         self.pi.set_mode(self.PIN, pigpio.OUTPUT)
 
         # Allow the ESC to 'wake up' by sending minimum value
-        self.set_motor(self.ESC_MIN)
+        self.set(self.ESC_MIN)
 
     # def set_ESC_range(self, low=800, high=1800):
     #     '''Configure input range on ESC, MUST run while ESC is starting!'''
@@ -44,13 +45,13 @@ def demo():
     # m1.set_ESC_range()
 
     print("Waking up ESC..")
-    piggy.set_servo_pulsewidth(18, 800)
+    piggy.set_servo_pulsewidth(18, 1000)
     time.sleep(5)
 
     print("Running motor demo:\n")
     while True:
         for n in range(50):
-            m1.set_motor(800+n*20)
+            m1.set(1000+n*20)
             print("."*n)
             sys.stdout.write("\033[F") # Cursor up one line
             # sys.stdout.write("\033[K") # Clear to the end of line
@@ -58,7 +59,7 @@ def demo():
             time.sleep(0.05)
 
         for n in range(50, 0, -1):
-            m1.set_motor(800+n*20)
+            m1.set(1000+n*20)
             print("."*n)
             sys.stdout.write("\033[F") # Cursor up one line
             sys.stdout.write("\033[K") # Clear to the end of line
