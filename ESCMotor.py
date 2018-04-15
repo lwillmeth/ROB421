@@ -35,38 +35,22 @@ class Motor:
         print("Bad value")
         return False
 
-
 def demo():
     piggy = pigpio.pi()
-
     m1 = Motor(pi=piggy, pin=18)
-    # motor_counter = ESCMotor.Motor(pi=piggy, pin=13)
-
-    # m1.set_ESC_range()
+    m2 = Motor(pi=piggy, pin=13)
 
     print("Waking up ESC..")
     piggy.set_servo_pulsewidth(18, 1000)
     time.sleep(5)
 
-    print("Running motor demo:\n")
-    while True:
-        for n in range(50):
-            m1.set(1000+n*20)
-            print("."*n)
-            sys.stdout.write("\033[F") # Cursor up one line
-            # sys.stdout.write("\033[K") # Clear to the end of line
-            # pi.set_servo_pulsewidth(PIN, 1010+20*n)
-            time.sleep(0.05)
-
-        for n in range(50, 0, -1):
-            m1.set(1000+n*20)
-            print("."*n)
-            sys.stdout.write("\033[F") # Cursor up one line
-            sys.stdout.write("\033[K") # Clear to the end of line
-            # pi.set_servo_pulsewidth(PIN, 1010+20*n)
-            time.sleep(0.05)
-
-        time.sleep(1)
+    print("Running motors at max speed..")
+    m1.set(2000)
+    m2.set(2000)
+    input("Press ENTER to stop demo.")
+    print("Halting motors..")
+    m1.set(1000)
+    m2.set(1000)
 
 if __name__ == "__main__":
     demo()
