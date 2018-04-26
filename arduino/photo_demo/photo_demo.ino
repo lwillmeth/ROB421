@@ -10,6 +10,10 @@
 #define PHOTO_THRESHOLD 500
 
 unsigned long last_fired;
+//  Valid states are:
+//    0 = idle
+//    1 = ball waiting
+//    2 = shot in progress
 int state = 0;
 boolean msg_sent = false;
 
@@ -58,7 +62,7 @@ void parseData() {
     char * strtokIndx; // this is used by strtok() as an index
 
     strtokIndx = strtok(tempChars,",");   // get the first part - the string
-    strcpy(apiFunction, strtokIndx);    // copy it to messageFromPC
+    strcpy(apiFunction, strtokIndx);      // copy it to messageFromPC
  
     strtokIndx = strtok(NULL, ",");       // this continues where the previous call left off
     leftMotor = atoi(strtokIndx);         // convert this part to an integer
@@ -93,6 +97,8 @@ void setup() {
 }
 
 void loop() {
+  
+  // Check for new API commands
   recvWithStartEndMarkers();
   if (newData == true) {
     strcpy(tempChars, receivedChars);
@@ -100,7 +106,11 @@ void loop() {
     showParsedData();
     newData = false;
   }
-  // Short demo of running the motors only when the ball is detected
+
+  // --------------------------------
+  // Short demo of running the motors
+  // only when the ball is detected
+  // --------------------------------
 
   // Check if the ball is ready to fire
   if( analogRead(BMONITOR_PIN) < PHOTO_THRESHOLD ){
