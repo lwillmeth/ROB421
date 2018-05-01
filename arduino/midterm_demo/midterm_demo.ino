@@ -16,10 +16,12 @@ boolean newData;
 PololuMotors throwMotors;
 API apiHandle;
 Scoreboard scoreboard(2, 25);
+apiCall waitingAPICmd;
+static const apiCall noAPICmd;
 
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.println("ROB421 Sensor Integration Demo");
 
   pinMode(DEBUG_LED,    OUTPUT);  // debugging led
@@ -47,10 +49,12 @@ void setup()
 void loop()
 {
   // Check for new API commands
-  newData = apiHandle.listen();
-  if (newData == true) {
+
+  if(apiHandle.listen()) {
+    waitingAPICmd = apiHandle.getAPICall();
     apiHandle.showAPICall();
-    newData = false;
+  } else {
+
   }
 
   // Check if the ball is ready to fire

@@ -1,15 +1,22 @@
 // API.cpp
 #include "Arduino.h"
+#define APIMaxChars 32
+  
+struct apiCall {
+  char function[APIMaxChars];
+  int arg1;
+  int arg2;
+};
 
 class API
 {
-  #define numChars 32
-  char receivedChars[numChars];
-  char tempChars[numChars];
-  char apiFunction[numChars] = {0};
+  char receivedChars[APIMaxChars];
+  char tempChars[APIMaxChars];
+//  char apiFunction[APIMaxChars] = {0};
   boolean newData = false;
-  int arg1;
-  int arg2;
+//  int arg1;
+//  int arg2;
+  apiCall lastCmd;
 
   public:
 //  API(void) { }
@@ -30,8 +37,8 @@ class API
               if (rc != endMarker) {
                   receivedChars[ndx] = rc;
                   ndx++;
-                  if (ndx >= numChars) {
-                      ndx = numChars - 1;
+                  if (ndx >= APIMaxChars) {
+                      ndx = APIMaxChars - 1;
                   }
               } else {
                   receivedChars[ndx] = '\0'; // terminate the string
@@ -47,8 +54,10 @@ class API
       if(newData){
         strcpy(tempChars, receivedChars);
         parseData();
+        newData = false;
+        return true;
       }
-      return newData;
+      return false;
   }
   
   /*
@@ -56,15 +65,16 @@ class API
    */
   void parseData() {
       char * strtokIndx; // this is used by strtok() as an index
-  
+
       strtokIndx = strtok(tempChars,",");   // get the first part - the string
-      strcpy(apiFunction, strtokIndx);      // copy it to messageFromPC
+//      strcpy(apiFunction, strtokIndx);      // copy it to messageFromPC
+      strcpy(lastCmd.function, strtokIndx);
    
       strtokIndx = strtok(NULL, ",");       // this continues where the previous call left off
-      arg1 = atoi(strtokIndx);              // convert this part to an integer
+      lastCmd.arg1 = atoi(strtokIndx);              // convert this part to an integer
   
       strtokIndx = strtok(NULL, ",");
-      arg2 = atoi(strtokIndx);
+      lastCmd.arg2 = atoi(strtokIndx);
   }
  
   /*
@@ -72,10 +82,14 @@ class API
    */
   void showAPICall() {
       Serial.print("Function call: ");
-      Serial.print(apiFunction);
+      Serial.print(lastCmd.function);
       Serial.print(", arg1: ");
-      Serial.print(arg1);
+      Serial.print(lastCmd.arg1);
       Serial.print(", arg2: ");
-      Serial.println(arg2);
+      Serial.println(lastCmd.arg2);
+  }
+
+  apiCall getAPICall(){
+    return lastCmd;
   }
 };
