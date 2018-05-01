@@ -17,7 +17,7 @@ class PololuMotors
   /*
    * Constructor
    */
-  PololuMotors( void )
+  void begin( void )
   {
       MotorSpeed    = 0;
       LMotorPercent = 1;
@@ -26,13 +26,34 @@ class PololuMotors
       md.calibrateCurrentOffsets();
       md.disableDrivers();
   }
+
+  /*
+   * Display current motor info
+   */
+   void display(){
+    Serial.print("Total speed: ");
+    Serial.println(MotorSpeed);
+    
+    Serial.print("Motor ratios: ");
+    Serial.print(LMotorPercent);
+    Serial.print(" : ");
+    Serial.println(RMotorPercent);
+
+    Serial.print("Motor speeds: ");
+    Serial.print(MotorSpeed * LMotorPercent);
+    Serial.print(" : ");
+    Serial.println(MotorSpeed * RMotorPercent);
+   
+   }
   
   /*
    * Increase motor speed by 10%
    */
   void incSpeed() 
   {
-    MotorSpeed = validateSpeed( MotorSpeed * 1.1 );
+    Serial.print("increasing..");
+    MotorSpeed = validateSpeed( MotorSpeed + MAX_SPEED*0.1 );
+    Serial.print(MotorSpeed);
   }
   
   /*
@@ -40,7 +61,9 @@ class PololuMotors
    */
   void decSpeed() 
   {
-    MotorSpeed = validateSpeed( MotorSpeed * 0.9 );
+    Serial.print("decreasing..");
+    MotorSpeed = validateSpeed( MotorSpeed - MAX_SPEED*0.1 );
+    Serial.print(MotorSpeed);
   }
   
   /*

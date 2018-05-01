@@ -1,6 +1,6 @@
 #include "Motors.cpp"
 #include "API.cpp"
-#include "Scoreboard.cpp"
+//#include "Scoreboard.cpp"
 
 #define DEBUGGING     true
 #define DEBUG_LED     13
@@ -15,14 +15,16 @@ boolean newData;
 
 PololuMotors throwMotors;
 API apiHandle;
-Scoreboard scoreboard(2, 25);
+//Scoreboard scoreboard(2, 25);
 apiCall waitingAPICmd;
 static const apiCall noAPICmd;
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("ROB421 Sensor Integration Demo");
+
+  throwMotors.begin();
 
   pinMode(DEBUG_LED,    OUTPUT);  // debugging led
   pinMode(SCORE_L_PIN,  OUTPUT);  // scoreboard left digit
@@ -52,15 +54,41 @@ void loop()
 
   if(apiHandle.listen()) {
     waitingAPICmd = apiHandle.getAPICall();
-    apiHandle.showAPICall();
-  } else {
+    if(waitingAPICmd.isReady){
+      waitingAPICmd.isReady = false;
+//      apiHandle.showAPICall();
 
+      switch(waitingAPICmd.fnNum){
+        case 0:
+          apiHandle.showAPICall();
+          break;
+        case 1:
+          throwMotors.incSpeed();
+          break;
+        case -1:
+          throwMotors.decSpeed();
+          break;
+        case 30:
+          throwMotors.setMotorValues(waitingAPICmd.arg1, waitingAPICmd.arg2);
+          break;
+        case 50:
+          throwMotors.setRatio(waitingAPICmd.arg1, waitingAPICmd.arg2);
+          break;
+        case 70:
+          throwMotors.setSpeed(waitingAPICmd.arg1);
+          break;
+        case 99:
+          throwMotors.firingSequence();
+          break;
+      }
+      throwMotors.display();
+    }
   }
 
-  // Check if the ball is ready to fire
-  if(analogRead(BMONITOR_PIN) < CAL_PHOTO_THRESHOLD){
-    Serial.print("Ball detected: ");
-    Serial.println( analogRead(BMONITOR_PIN) );
-    throwMotors.firingSequence();
-  }
+//  // Check if the ball is ready to fire
+//  if(analogRead(BMONITOR_PIN) < CAL_PHOTO_THRESHOLD){
+//    Serial.print("Ball detected: ");
+//    Serial.println( analogRead(BMONITOR_PIN) );
+////    throwMotors.firingSequence();
+//  }
 }

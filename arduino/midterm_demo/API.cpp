@@ -3,9 +3,10 @@
 #define APIMaxChars 32
   
 struct apiCall {
-  char function[APIMaxChars];
+  int fnNum;
   int arg1;
   int arg2;
+  boolean isReady;
 };
 
 class API
@@ -64,17 +65,17 @@ class API
    * Parse string from an API call, validate as command, and execute
    */
   void parseData() {
-      char * strtokIndx; // this is used by strtok() as an index
+      char * strtokIndx;                  // this is used by strtok() as an index
 
-      strtokIndx = strtok(tempChars,",");   // get the first part - the string
-//      strcpy(apiFunction, strtokIndx);      // copy it to messageFromPC
-      strcpy(lastCmd.function, strtokIndx);
+      strtokIndx = strtok(tempChars,",");
+      lastCmd.fnNum = atoi(strtokIndx);
    
-      strtokIndx = strtok(NULL, ",");       // this continues where the previous call left off
-      lastCmd.arg1 = atoi(strtokIndx);              // convert this part to an integer
+      strtokIndx = strtok(NULL, ",");
+      lastCmd.arg1 = atoi(strtokIndx);
   
       strtokIndx = strtok(NULL, ",");
       lastCmd.arg2 = atoi(strtokIndx);
+      lastCmd.isReady = true;
   }
  
   /*
@@ -82,7 +83,7 @@ class API
    */
   void showAPICall() {
       Serial.print("Function call: ");
-      Serial.print(lastCmd.function);
+      Serial.print(lastCmd.fnNum);
       Serial.print(", arg1: ");
       Serial.print(lastCmd.arg1);
       Serial.print(", arg2: ");
