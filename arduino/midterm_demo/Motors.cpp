@@ -43,7 +43,7 @@ class PololuMotors
     Serial.print(MotorSpeed * LMotorPercent);
     Serial.print(" : ");
     Serial.println(MotorSpeed * RMotorPercent);
-   
+    Serial.println();
    }
   
   /*
@@ -51,7 +51,7 @@ class PololuMotors
    */
   void incSpeed() 
   {
-    Serial.print("increasing..");
+    Serial.print("increasing to ");
     MotorSpeed = validateSpeed( MotorSpeed + MAX_SPEED*0.1 );
     Serial.print(MotorSpeed);
   }
@@ -61,7 +61,7 @@ class PololuMotors
    */
   void decSpeed() 
   {
-    Serial.print("decreasing..");
+    Serial.print("decreasing to ");
     MotorSpeed = validateSpeed( MotorSpeed - MAX_SPEED*0.1 );
     Serial.print(MotorSpeed);
   }
@@ -134,21 +134,31 @@ class PololuMotors
    */
   void firingSequence() 
   {
+    Serial.print("Throwing at ");
+    Serial.print(MotorSpeed);
+    
     md.enableDrivers();
     delay(1);  // The drivers require a maximum of 1ms to elapse when brought out of sleep mode.
+
+    int goal = MotorSpeed;
   
     // range is -400 (reverse) to 400 (forward)
-    for (int i = 0; i <= 400; i++) {
+    for (int i = 0; i <= goal; i++) {
+      if(i % 10 == 0) { Serial.print('.'); }
       setSpeed(i);
       delay(2);
     }
   
     delay(TIMER_DELAY);
-    for (int i =400; i >= 0; i--) {
+    for (int i = goal; i >= 0; i--) {
+      if(i % 10 == 0) { Serial.print('.'); }
       setSpeed(i);
       delay(2);
     }
     md.disableDrivers();
+    
+    MotorSpeed = goal;
+    Serial.print(" OK.");
   }
 
 };

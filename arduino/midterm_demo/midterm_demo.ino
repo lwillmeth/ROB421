@@ -59,36 +59,38 @@ void loop()
 //      apiHandle.showAPICall();
 
       switch(waitingAPICmd.fnNum){
-        case 0:
-          apiHandle.showAPICall();
-          break;
-        case 1:
-          throwMotors.incSpeed();
-          break;
         case -1:
           throwMotors.decSpeed();
           break;
-        case 30:
+        case 1:
           throwMotors.setMotorValues(waitingAPICmd.arg1, waitingAPICmd.arg2);
           break;
-        case 50:
+        case 2:
           throwMotors.setRatio(waitingAPICmd.arg1, waitingAPICmd.arg2);
           break;
-        case 70:
+        case 3:
           throwMotors.setSpeed(waitingAPICmd.arg1);
           break;
-        case 99:
+        case 9:
           throwMotors.firingSequence();
           break;
+        default:
+          if( 10 <= waitingAPICmd.fnNum && waitingAPICmd.fnNum <= 100 ){
+            // Set motor speed to a percentage (this is getting messy)
+            throwMotors.setSpeed(4 * waitingAPICmd.fnNum);
+          } else {
+            Serial.print(waitingAPICmd.fnNum);
+            Serial.println(" is not a valid command.");
+          }
       }
       throwMotors.display();
     }
   }
 
-//  // Check if the ball is ready to fire
-//  if(analogRead(BMONITOR_PIN) < CAL_PHOTO_THRESHOLD){
-//    Serial.print("Ball detected: ");
-//    Serial.println( analogRead(BMONITOR_PIN) );
-////    throwMotors.firingSequence();
-//  }
+  // Check if the ball is ready to fire
+  if(analogRead(BMONITOR_PIN) < CAL_PHOTO_THRESHOLD){
+    Serial.print("Ball detected: ");
+    Serial.println( analogRead(BMONITOR_PIN) );
+    throwMotors.firingSequence();
+  }
 }
