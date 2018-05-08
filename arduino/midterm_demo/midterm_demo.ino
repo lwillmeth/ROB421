@@ -27,6 +27,7 @@ void setup()
   Serial.begin(115200);
   Serial.println("ROB421 Sensor Integration Demo");
 
+  // Prepare the motors
   throwMotors.begin();
 
   pinMode(DEBUG_LED,    OUTPUT);  // debugging led
@@ -47,6 +48,7 @@ void setup()
     Serial.println(CAL_PHOTO_THRESHOLD); 
   }
 }
+
 
 /*
  * Main program loop

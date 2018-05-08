@@ -5,6 +5,8 @@
 #define TIMER_DELAY 5000
 #define MAX_SPEED 400
 #define MIN_SPEED 0
+#define THROW_SERVO_PIN 10
+#include <Servo.h>
 
 class PololuMotors 
 {
@@ -12,6 +14,7 @@ class PololuMotors
   double LMotorPercent;
   double RMotorPercent;
   DualG2HighPowerMotorShield24v14 md;
+  Servo throwServo;
 
   public:
   /*
@@ -25,6 +28,9 @@ class PololuMotors
       md.init();
       md.calibrateCurrentOffsets();
       md.disableDrivers();
+
+      throwServo.attach(THROW_SERVO_PIN);
+      throwServo.write(90); // Set to midpoint
   }
 
   /*
@@ -159,6 +165,20 @@ class PololuMotors
     
     MotorSpeed = goal;
     Serial.print(" OK.");
+  }
+  
+  /*
+   * Move the throwing servo back and forth
+   */
+  void move_throw_servo()
+  {
+    // Slowly swing servo into throwing position
+    for(int i=90; i<=45; i--){
+      throwServo.write(i);
+      delay(10);
+    }
+    // Return to resting position
+    throwServo.write(90);
   }
 
 };
