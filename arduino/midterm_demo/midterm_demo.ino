@@ -1,6 +1,7 @@
 #include "Motors.cpp"
 #include "API.cpp"
 //#include "Scoreboard.cpp"
+#include <Stepper.h>
 
 #define DEBUGGING     true
 #define DEBUG_LED     13
@@ -8,12 +9,14 @@
 #define SCORE_R_PIN   8
 #define BMONITOR_PIN  0
 #define PHOTO_THRESHOLD 500
+#define STEPS_PER_REV 200
 
 // Calibration value for photoresistor
 int CAL_PHOTO_THRESHOLD;
 boolean newData;
 
 PololuMotors throwMotors;
+Stepper baseMotor(STEPS_PER_REV, 4, 5, 6, 7);
 API apiHandle;
 //Scoreboard scoreboard(2, 25);
 apiCall waitingAPICmd;
@@ -63,18 +66,31 @@ void loop()
           throwMotors.decSpeed();
           break;
         case 1:
+          // Set both throw motors to absolute (0-400) values
+          // <1 200 250>
           throwMotors.setMotorValues(waitingAPICmd.arg1, waitingAPICmd.arg2);
           break;
         case 2:
+          // Set both throw motors to a percentage of the current max speed
+          // <2 50 65>
           throwMotors.setRatio(waitingAPICmd.arg1, waitingAPICmd.arg2);
           break;
         case 3:
+          // Set the max (100%) speed for both motors
+          // <3 50 65>
           throwMotors.setSpeed(waitingAPICmd.arg1);
           break;
+        case 4:
+          // Step forward or backwards x steps
+          // <4 2>
+          baseMotor.step(waitingAPICmd.arg1);
+          break;
         case 9:
+          // Run the firing sequence
           throwMotors.firingSequence();
           break;
         default:
+          // Set the max (100%) speed for both motors, IFF 10 <= x <= 100
           if( 10 <= waitingAPICmd.fnNum && waitingAPICmd.fnNum <= 100 ){
             // Set motor speed to a percentage (this is getting messy)
             throwMotors.setSpeed(4 * waitingAPICmd.fnNum);
