@@ -154,7 +154,10 @@ class PololuMotors
       setSpeed(i);
       delay(2);
     }
-  
+    
+    // Move the firing servo arm
+    move_throw_servo();
+    
     delay(TIMER_DELAY);
     for (int i = goal; i >= 0; i--) {
       if(i % 10 == 0) { Serial.print('.'); }
