@@ -1,12 +1,12 @@
 // Motors.cpp
 #include "Arduino.h"
 #include "DualG2HighPowerMotorShield.h"
+#include "ServoTimer2.h"
 
 #define TIMER_DELAY 5000
 #define MAX_SPEED 400
 #define MIN_SPEED 0
-#define THROW_SERVO_PIN 10
-#include <Servo.h>
+#define THROW_SERVO_PIN 0
 
 class PololuMotors 
 {
@@ -28,9 +28,6 @@ class PololuMotors
       md.init();
       md.calibrateCurrentOffsets();
       md.disableDrivers();
-
-      throwServo.attach(THROW_SERVO_PIN);
-      throwServo.write(90); // Set to midpoint
   }
 
   /*
@@ -97,7 +94,7 @@ class PololuMotors
   void setSpeed( int newSpeed ) 
   {
     MotorSpeed = validateSpeed( newSpeed );
-    writeToMotors();
+    writeToMotors(MotorSpeed);
   }
   
   /*
@@ -105,8 +102,13 @@ class PololuMotors
    */
   void writeToMotors()
   {
-    md.setM1Speed( MotorSpeed * LMotorPercent );
-    md.setM2Speed( MotorSpeed * RMotorPercent );
+    writeToMotors( MotorSpeed );
+  }
+
+  void writeToMotors(int mSpeed)
+  {
+    md.setM1Speed( mSpeed );
+    md.setM2Speed( mSpeed );
   }
   
   /*
@@ -150,38 +152,43 @@ class PololuMotors
   
     // range is -400 (reverse) to 400 (forward)
     for (int i = 0; i <= goal; i++) {
-      if(i % 10 == 0) { Serial.print('.'); }
+      if(i % 10 == 0) { Serial.print('+'); }
       setSpeed(i);
       delay(2);
     }
-    
+    delay(3000);
+    Serial.print("servo");
+
     // Move the firing servo arm
-    move_throw_servo();
+    //move_throw_servo();
+//    delay(3000);
     
     delay(TIMER_DELAY);
     for (int i = goal; i >= 0; i--) {
-      if(i % 10 == 0) { Serial.print('.'); }
+      if(i % 10 == 0) { Serial.print('-'); }
       setSpeed(i);
       delay(2);
     }
+
+    // Leave motors disabled when not intentionally using them
     md.disableDrivers();
     
     MotorSpeed = goal;
-    Serial.print(" OK.");
+    Serial.println(" OK.");
   }
   
   /*
    * Move the throwing servo back and forth
    */
-  void move_throw_servo()
-  {
-    // Slowly swing servo into throwing position
-    for(int i=90; i<=45; i--){
-      throwServo.write(i);
-      delay(10);
-    }
-    // Return to resting position
-    throwServo.write(90);
-  }
+//  void move_throw_servo()
+//  {
+//    // Slowly swing servo into throwing position
+//    for(int i=90; i<=45; i--){
+//      throwServo.write(i);
+//      delay(10);
+//    }
+//    // Return to resting position
+//    throwServo.write(90);
+//  }
 
 };
