@@ -1,10 +1,12 @@
 // Motors.cpp
 #include "Arduino.h"
 #include "DualG2HighPowerMotorShield.h"
+#include <ServoTimer2.h>
 
-#define TIMER_DELAY 5000
+#define TIMER_DELAY 2000
 #define MAX_SPEED 400
 #define MIN_SPEED 0
+#define THROW_SERVO_PIN 11
 
 class PololuMotors 
 {
@@ -12,6 +14,7 @@ class PololuMotors
   double LMotorPercent;
   double RMotorPercent;
   DualG2HighPowerMotorShield24v14 md;
+  ServoTimer2 throwServo;
 
   public:
   /*
@@ -25,6 +28,8 @@ class PololuMotors
       md.init();
       md.calibrateCurrentOffsets();
       md.disableDrivers();
+      throwServo.attach(THROW_SERVO_PIN);
+      throwServo.write(2300);
   }
 
   /*
@@ -91,7 +96,7 @@ class PololuMotors
   void setSpeed( int newSpeed ) 
   {
     MotorSpeed = validateSpeed( newSpeed );
-    writeToMotors();
+    writeToMotors(MotorSpeed);
   }
   
   /*
@@ -99,8 +104,13 @@ class PololuMotors
    */
   void writeToMotors()
   {
-    md.setM1Speed( MotorSpeed * LMotorPercent );
-    md.setM2Speed( MotorSpeed * RMotorPercent );
+    writeToMotors( MotorSpeed );
+  }
+
+  void writeToMotors(int mSpeed)
+  {
+    md.setM1Speed( mSpeed );
+    md.setM2Speed( mSpeed );
   }
   
   /*
@@ -148,17 +158,37 @@ class PololuMotors
       setSpeed(i);
       delay(2);
     }
-  
+
+    // Give the motors time to wind up
     delay(TIMER_DELAY);
+
+    // Move the firing servo arm
+    move_throw_servo();
+
+    // Ball is gone, might as well wind down
     for (int i = goal; i >= 0; i--) {
       if(i % 10 == 0) { Serial.print('.'); }
       setSpeed(i);
       delay(2);
     }
+
+    // Leave motors disabled when not intentionally using them
     md.disableDrivers();
     
     MotorSpeed = goal;
-    Serial.print(" OK.");
+    Serial.println(" OK.");
+  }
+  
+  /*
+   * Move the throwing servo back and forth
+   */
+  void move_throw_servo()
+  {
+    Serial.print(">");
+    throwServo.write(300);
+    delay(1500);
+    throwServo.write(2500);
+    Serial.print("<");
   }
 
 };
