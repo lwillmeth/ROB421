@@ -8,7 +8,7 @@
 #define MIN_SPEED 0
 #define THROW_SERVO_PIN 11
 
-class PololuMotors 
+class PololuMotors
 {
   int MotorSpeed;
   double LMotorPercent;
@@ -38,7 +38,7 @@ class PololuMotors
    void display(){
     Serial.print("Total speed: ");
     Serial.println(MotorSpeed);
-    
+
     Serial.print("Motor ratios: ");
     Serial.print(LMotorPercent);
     Serial.print(" : ");
@@ -50,55 +50,55 @@ class PololuMotors
     Serial.println(MotorSpeed * RMotorPercent);
     Serial.println();
    }
-  
+
   /*
    * Increase motor speed by 10%
    */
-  void incSpeed() 
+  void incSpeed()
   {
     Serial.print("increasing to ");
     MotorSpeed = validateSpeed( MotorSpeed + MAX_SPEED*0.1 );
     Serial.print(MotorSpeed);
   }
-  
+
   /*
    * Decrease motor speed by 10%
    */
-  void decSpeed() 
+  void decSpeed()
   {
     Serial.print("decreasing to ");
     MotorSpeed = validateSpeed( MotorSpeed - MAX_SPEED*0.1 );
     Serial.print(MotorSpeed);
   }
-  
+
   /*
    * Set both motor speeds to absolute values (unsafe)
    */
-  void setMotorValues( int left, int right ) 
+  void setMotorValues( int left, int right )
   {
     md.setM1Speed( left  );
     md.setM2Speed( right );
   }
-  
+
   /*
    * Update both motor speed ratios as a percent 0-1
    */
-  void setRatio( int left, int right ) 
+  void setRatio( int left, int right )
   {
     LMotorPercent = validateRatio( (double) left / 100 );
     RMotorPercent = validateRatio( (double) right / 100 );
     writeToMotors();
   }
-  
+
   /*
    * Update the total motor speed, then set both motors using their current ratios
    */
-  void setSpeed( int newSpeed ) 
+  void setSpeed( int newSpeed )
   {
     MotorSpeed = validateSpeed( newSpeed );
     writeToMotors(MotorSpeed);
   }
-  
+
   /*
    * Update motor speeds using current parameters
    */
@@ -112,11 +112,11 @@ class PololuMotors
     md.setM1Speed( mSpeed );
     md.setM2Speed( mSpeed );
   }
-  
+
   /*
    * Ensure motor speeds remain within 0 (0%) and 400 (100%)
    */
-  int validateSpeed( int newSpeed ) 
+  int validateSpeed( int newSpeed )
   {
     if( newSpeed > MAX_SPEED ){
       newSpeed = MAX_SPEED;
@@ -125,11 +125,11 @@ class PololuMotors
     }
     return newSpeed;
   }
-  
+
   /*
    * Ensure motor ratios stay between 0 (0%) and 1 (100%)
    */
-  double validateRatio( double newRatio ) 
+  double validateRatio( double newRatio )
   {
     if( newRatio > 1 ){
       newRatio = 1;
@@ -138,28 +138,27 @@ class PololuMotors
     }
     return newRatio;
   }
-  
+
   /*
    * Firing sequence to throw a ball
    */
-  void firingSequence() 
+  void firingSequence()
   {
     Serial.print("Throwing at ");
     Serial.print(MotorSpeed);
-    
+
     md.enableDrivers();
     delay(1);  // The drivers require a maximum of 1ms to elapse when brought out of sleep mode.
 
     int goal = MotorSpeed;
-  
+
     // range is -400 (reverse) to 400 (forward)
     for (int i = 0; i <= goal; i++) {
-      if(i % 10 == 0) { Serial.print('.'); }
+      if(i % 10 == 0) { Serial.print('+'); }
       setSpeed(i);
       delay(2);
     }
-
-    // Give the motors time to wind up
+    // Spin up the throwing motors
     delay(TIMER_DELAY);
 
     // Move the firing servo arm
@@ -167,18 +166,18 @@ class PololuMotors
 
     // Ball is gone, might as well wind down
     for (int i = goal; i >= 0; i--) {
-      if(i % 10 == 0) { Serial.print('.'); }
+      if(i % 10 == 0) { Serial.print('-'); }
       setSpeed(i);
       delay(2);
     }
 
     // Leave motors disabled when not intentionally using them
     md.disableDrivers();
-    
+
     MotorSpeed = goal;
     Serial.println(" OK.");
   }
-  
+
   /*
    * Move the throwing servo back and forth
    */
@@ -190,5 +189,3 @@ class PololuMotors
     throwServo.write(2500);
     Serial.print("<");
   }
-
-};

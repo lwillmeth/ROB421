@@ -1,7 +1,7 @@
 #include "FastLED.h"
 
-#define NUM_LEDS 25
-#define DATA_PIN 2
+#define NUM_LEDS 36
+#define DATA_PIN 5
 
 // Define the array of leds
 CRGB leds[NUM_LEDS];
@@ -27,30 +27,51 @@ int smallDigit[][19]{
   {10, 0,1,2,3,4,5,11,12,13,16,17},
   {12, 3,4,5,6,7,11,12,13,14,15,16,17},
   {15, 3,4,5,6,7,8,9,10,11,12,13,14,15,16,17},
-  {8, 0,1,2,3,4,5,14,15},
+  {8,  0,1,2,3,4,5,14,15},
   {18, 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17},
   {13, 0,1,2,3,4,5,11,12,13,14,15,16,17}
 };
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+  delay(1000);
+//  Serial.println("Starting up..");
 }
 
 void loop() {
   digitalWrite(LED_BUILTIN, HIGH);
-  for(int digit=0; digit<10; digit++){
-    Serial.println(digit);
-    for(int i=1; i <= smallDigit[digit][0]; i++){
-      Serial.print("\t");
-      Serial.println(smallDigit[digit][i]);
-      leds[smallDigit[digit][i]] = CRGB::Red;
+
+  // Left digit
+  for(int left=0; left<10; left++){
+    Serial.println(left);
+    for(int i=1; i <= smallDigit[left][0]; i++){
+      leds[18+smallDigit[left][i]] = CRGB::Red;
     }
     FastLED.show();
-    for(int i=0; i<NUM_LEDS; i++){
+
+    // Right digit
+    for(int right=0; right<10; right++){
+      Serial.print("\t -> ");
+      Serial.println(right);
+      for(int i=1; i <= smallDigit[right][0]; i++){
+        leds[smallDigit[right][i]] = CRGB::Blue;
+      }
+      FastLED.show();
+      
+      // reset the left digit
+      for(int i=0; i<NUM_LEDS/2; i++){
+        leds[i] = CRGB::Black;
+      }
+      delay(500);
+    }
+
+    // reset the right digit
+    for(int i=18; i<NUM_LEDS; i++){
       leds[i] = CRGB::Black;
     }
-    delay(500);
-    digitalWrite(LED_BUILTIN, LOW);
   }
+
+  delay(3000);
+  digitalWrite(LED_BUILTIN, LOW);
 }

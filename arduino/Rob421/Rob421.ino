@@ -39,20 +39,19 @@ void turn(int deg)
   Serial.print("inside, steps = ");
   Serial.println(steps);
 
-  digitalWrite(TURN_ENA_PIN,HIGH);
   for (int i=0; i<steps; i++){
-    if(deg > 0)
+    if(deg > 0){
       digitalWrite(TURN_DIR_PIN,LOW);
-    else
+    }else{
       digitalWrite(TURN_DIR_PIN,HIGH);
-    
+    }
+
     digitalWrite(TURN_PUL_PIN,HIGH);
     delayMicroseconds(TURN_DELAY);
     digitalWrite(TURN_PUL_PIN,LOW);
     delayMicroseconds(TURN_DELAY);
   }
-  
-  digitalWrite(TURN_ENA_PIN,LOW);
+
 }
 
 void setup()
@@ -80,10 +79,10 @@ void setup()
   }
   CAL_PHOTO_THRESHOLD = photo_sum / 500;
   CAL_PHOTO_THRESHOLD -= CAL_PHOTO_THRESHOLD/4;
-  
+
   if(DEBUGGING){
     Serial.print("CAL_PHOTO_THRESHOLD = ");
-    Serial.println(CAL_PHOTO_THRESHOLD); 
+    Serial.println(CAL_PHOTO_THRESHOLD);
   }
 
 //  Stepper myStepper(TURN_STEPS, TURN_PUL_PIN, TURN_DIR_PIN);
