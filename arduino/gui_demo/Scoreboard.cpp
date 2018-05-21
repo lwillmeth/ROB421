@@ -22,17 +22,29 @@ class Scoreboard{
   };
 
   public:
+  int blueScore;
+  int redScore;
+  
   Scoreboard(int pin, int num_leds){
+    blueScore = 0;
+    redScore = 0;
     FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
   }
+
+  void updateBlue(){
+    for(int i=0; i<NUM_LEDS; i++){
+      leds[i] = CRGB::Black;
+    }
+    for(int i=1; i <= smallDigit[blueScore][0]; i++){
+      leds[smallDigit[blueScore][i]] = CRGB::Blue;
+    }
+    FastLED.show();
+  }
+
   
   void demo() {
-//    digitalWrite(LED_BUILTIN, HIGH);
     for(int digit=0; digit<10; digit++){
-//      Serial.println(digit);
       for(int i=1; i <= smallDigit[digit][0]; i++){
-//        Serial.print("\t");
-//        Serial.println(smallDigit[digit][i]);
         leds[smallDigit[digit][i]] = CRGB::Red;
       }
       FastLED.show();

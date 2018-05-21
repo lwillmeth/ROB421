@@ -1,5 +1,5 @@
 #include "Motors.cpp"
-//#include "Scoreboard.cpp"
+#include "Scoreboard.cpp"
 #include <Bridge.h>
 #include <BlynkSimpleYun.h>
 
@@ -24,7 +24,7 @@ char auth[] = "ec4d250a7a664698b3eaefb3fdba2853";
 int CAL_PHOTO_THRESHOLD;
 
 PololuMotors throwMotors;
-//Scoreboard scoreboard(2, 25);
+Scoreboard scoreboard(2, 25);
 
 /*
  * Turn the robot x degrees (pos is cw, neg is ccw)
@@ -46,7 +46,7 @@ void turn(int numSteps)
 
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.println("ROB421 GUI Demo");
 
   Blynk.begin(auth);
@@ -128,11 +128,25 @@ BLYNK_WRITE(V4)
 }
 
 /*
+ * Get blue score from app
+ */
+BLYNK_WRITE(V6)
+{
+  scoreboard.blueScore += param.asInt();
+  if( scoreboard.blueScore < 0 ) scoreboard.blueScore = 0;
+  if( scoreboard.blueScore > 9 ) scoreboard.blueScore = 9;
+  Serial.print("Blue score: ");
+  Serial.println( scoreboard.blueScore );
+  scoreboard.updateBlue();
+}
+
+/*
  * Triggers on 'FIRE' command from app
  */
 BLYNK_WRITE(V9)
 {
   throwMotors.firingSequence();
+  Blynk.virtualWrite(V9, 0);
 }
 
 /*
@@ -172,7 +186,6 @@ BLYNK_READ(V3)
 {
     Blynk.virtualWrite(V3, throwMotors.maxSpeed);
 }
-
 
 /*
  * Send threshold to app

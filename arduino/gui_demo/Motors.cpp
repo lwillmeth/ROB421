@@ -1,7 +1,7 @@
 // Motors.cpp
 #include "Arduino.h"
 #include "DualG2HighPowerMotorShield.h"
-#include <ServoTimer2.h>
+//#include <ServoTimer2.h>
 
 #define SERVO_DELAY 2000
 #define MAX_SPEED 400
