@@ -69,16 +69,22 @@ void setup()
   digitalWrite(BPOWER_PIN, HIGH);
   digitalWrite(BGND_PIN,   LOW);
 
-  delay(3000);
+  // Initialize photo resistor
+  delay(500);
+  calibrate_photo();
+  Serial.print("CAL_PHOTO_THRESHOLD = ");
+  Serial.println(CAL_PHOTO_THRESHOLD);
+}
+
+int calibrate_photo()
+{
   long photo_sum = 0;
   for(int i=0; i<500; i++){
     photo_sum += analogRead(BMONITOR_PIN);
   }
   CAL_PHOTO_THRESHOLD = photo_sum / 500;
   CAL_PHOTO_THRESHOLD -= CAL_PHOTO_THRESHOLD/4;
-
-  Serial.print("CAL_PHOTO_THRESHOLD = ");
-  Serial.println(CAL_PHOTO_THRESHOLD);
+  return CAL_PHOTO_THRESHOLD;
 }
 
 
@@ -128,6 +134,17 @@ BLYNK_WRITE(V4)
 }
 
 /*
+ * Resets photoresistor from app
+ */
+BLYNK_WRITE(V5)
+{
+  Serial.print("Re-calibrating photoresistor...");
+  calibrate_photo();
+  Blynk.virtualWrite(V5, 0);
+  Serial.println(CAL_PHOTO_THRESHOLD);
+}
+
+/*
  * Get blue score from app
  */
 BLYNK_WRITE(V6)
@@ -138,6 +155,19 @@ BLYNK_WRITE(V6)
   Serial.print("Blue score: ");
   Serial.println( scoreboard.blueScore );
   scoreboard.updateBlue();
+}
+
+/*
+ * Get red score from app
+ */
+BLYNK_WRITE(V7)
+{
+  scoreboard.redScore += param.asInt();
+  if( scoreboard.redScore < 0 ) scoreboard.redScore = 0;
+  if( scoreboard.redScore > 9 ) scoreboard.redScore = 9;
+  Serial.print("Red score: ");
+  Serial.println( scoreboard.redScore );
+  scoreboard.updateRed();
 }
 
 /*

@@ -36,17 +36,13 @@ class PololuMotors
    */
   void setSpeed( int newSpeed )
   {
-    int LSpeed = int(
-      (100 - max(50, spinVal)) * newSpeed / 12.5
-    );
-    int RSpeed = int(
-      min(50, spinVal) * newSpeed / 12.5
-    );
+    int LSpeed = min(50, spinVal) * newSpeed / 12.5;
+    int RSpeed = (100 - max(50, spinVal)) * newSpeed / 12.5;
 
-    Serial.print("setSpeed using: ");
-    Serial.print(LSpeed);
-    Serial.print(", ");
-    Serial.println(RSpeed);
+//    Serial.print("setSpeed using: ");
+//    Serial.print(LSpeed);
+//    Serial.print(", ");
+//    Serial.println(RSpeed);
     
     md.setM1Speed( LSpeed );
     md.setM2Speed( RSpeed );
