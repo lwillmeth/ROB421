@@ -15,10 +15,13 @@
 #define TURN_PUL_PIN  5
 #define TURN_DIR_PIN  3
 #define TURN_ENA_PIN  13
-#define TURN_DELAY    1000
+#define TURN_DELAY    1500
 
 // Blynk auth code
-char auth[] = "ec4d250a7a664698b3eaefb3fdba2853";
+char auth[] = "90782f78485a448f9ab68a245af6ac4a";
+
+// Default behavior is to auto throw if the ball is detected
+bool autoThrow = true;
 
 // Calibration value for photoresistor
 int CAL_PHOTO_THRESHOLD;
@@ -49,7 +52,8 @@ void setup()
   Serial.begin(9600);
   Serial.println("ROB421 GUI Demo");
 
-  Blynk.begin(auth);
+//  Blynk.begin(auth);
+  Blynk.begin(auth, IPAddress(192,168,240,109), 8080);
 
   // Prepare the motors
   throwMotors.begin();
@@ -83,7 +87,7 @@ int calibrate_photo()
     photo_sum += analogRead(BMONITOR_PIN);
   }
   CAL_PHOTO_THRESHOLD = photo_sum / 500;
-  CAL_PHOTO_THRESHOLD -= CAL_PHOTO_THRESHOLD/4;
+  CAL_PHOTO_THRESHOLD -= (CAL_PHOTO_THRESHOLD/10);
   return CAL_PHOTO_THRESHOLD;
 }
 
@@ -91,13 +95,30 @@ int calibrate_photo()
 void loop()
 {
   Blynk.run();
+  // Automatically throw, if appropriate to do so
+  if(autoThrow && analogRead(BMONITOR_PIN) < CAL_PHOTO_THRESHOLD){
+    throwMotors.firingSequence();
+  }
+  Blynk.virtualWrite(V0, analogRead(BMONITOR_PIN));
 }
 
+// Update values on the app, using arduino values
 BLYNK_CONNECTED()
 {
+  Blynk.syncVirtual(V0);
   Blynk.syncVirtual(V1);
   Blynk.syncVirtual(V2);
   Blynk.syncVirtual(V3);
+}
+
+/*
+ * Get throwing mode (auto/manual) from app
+ */
+BLYNK_WRITE(V1)
+{
+  autoThrow = param.asInt();
+  Serial.print("autoThrow = ");
+  Serial.println(autoThrow);
 }
 
 /*
@@ -140,8 +161,8 @@ BLYNK_WRITE(V5)
 {
   Serial.print("Re-calibrating photoresistor...");
   calibrate_photo();
-  Blynk.virtualWrite(V5, 0);
   Serial.println(CAL_PHOTO_THRESHOLD);
+  Blynk.virtualWrite(V5, 0);
 }
 
 /*
@@ -184,21 +205,15 @@ BLYNK_WRITE(V9)
  */
 BLYNK_READ(V0)
 {
-  if(analogRead(BMONITOR_PIN) < CAL_PHOTO_THRESHOLD){
-    Serial.println("Ball detected!");
-    Blynk.virtualWrite(V1, 1023);
-  }
   Blynk.virtualWrite(V0, analogRead(BMONITOR_PIN));
 }
 
 /*
- * Send ball status values to app
+ * Send the throwing mode to app
  */
 BLYNK_READ(V1)
 {
-  Serial.print("V1: ");
-  Blynk.virtualWrite(V1, 1023);
-//  throwMotors.firingSequence();
+  Blynk.virtualWrite(V1, autoThrow);
 }
 
 /*

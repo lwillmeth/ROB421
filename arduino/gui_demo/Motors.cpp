@@ -1,7 +1,7 @@
 // Motors.cpp
 #include "Arduino.h"
 #include "DualG2HighPowerMotorShield.h"
-//#include <ServoTimer2.h>
+#include <ServoTimer4.h>
 
 #define SERVO_DELAY 2000
 #define MAX_SPEED 400
@@ -11,7 +11,7 @@
 class PololuMotors
 {
   DualG2HighPowerMotorShield24v14 md;
-//  ServoTimer2 throwServo;
+  ServoTimer4 throwServo;
 
   public:
   int spinVal;
@@ -27,8 +27,8 @@ class PololuMotors
       md.init();
       md.calibrateCurrentOffsets();
       md.disableDrivers();
-//      throwServo.attach(THROW_SERVO_PIN);
-//      throwServo.write(2300);
+      throwServo.attach(THROW_SERVO_PIN);
+      throwServo.write(2500);
   }
 
   /*
@@ -72,11 +72,9 @@ class PololuMotors
     delay(SERVO_DELAY);
 
     // Move the firing servo arm
-    Serial.print(">");
-//    throwServo.write(300);
-//    delay(1500);
-//    throwServo.write(2500);
-    Serial.print("<");
+    throwServo.write(0);
+    delay(1500);
+    throwServo.write(2500);
 
     // Ball is gone, might as well wind down
     for (int i = maxSpeed; i >= 0; i--) {
